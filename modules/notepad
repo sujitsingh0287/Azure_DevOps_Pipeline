@@ -1,0 +1,320 @@
+Bilkul bhai! Tu jo chahta hai, wo ek clean production-style modular setup hai, jisme:
+
+Resource Group, Storage Account aur VM ke liye alag-alag Terraform root folders hon
+
+Sabhi ka shared module ho (reusable code)
+
+Har resource ka alag GitHub Workflow ho (jo sirf usi resource ko banaye)
+
+Tu one by one run karega — jise jab chalao, wahi resource bane
+
+
+Chal ab step-by-step bana ke deta hoon, ekdum samajhne layak. 🎯
+
+
+---
+
+✅ Final Folder Structure
+
+terraform-infra/
+├── .github/
+│   └── workflows/
+│       ├── rg.yml
+│       ├── storage.yml
+│       └── vm.yml
+│
+├── modules/
+│   ├── rg/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   ├── storage/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   └── vm/
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
+│
+├── rg/
+│   ├── main.tf
+│   ├── variables.tf
+│   └── terraform.tfvars
+│
+├── storage/
+│   ├── main.tf
+│   ├── variables.tf
+│   └── terraform.tfvars
+│
+└── vm/
+    ├── main.tf
+    ├── variables.tf
+    └── terraform.tfvars
+
+
+---
+
+🧱 1. modules/ (Child Modules)
+
+📁 modules/rg/main.tf
+
+resource "azurerm_resource_group" "this" {
+  name     = var.rg_name
+  location = var.location
+}
+
+📁 modules/rg/variables.tf
+
+variable "rg_name" {}
+variable "location" {}
+
+📁 modules/rg/outputs.tf
+
+output "rg_name" {
+  value = azurerm_resource_group.this.name
+}
+
+
+---
+
+📁 modules/storage/main.tf
+
+resource "azurerm_storage_account" "this" {
+  name                     = var.storage_name
+  resource_group_name      = var.rg_name
+  location                 = var.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+}
+
+📁 modules/storage/variables.tf
+
+variable "storage_name" {}
+variable "rg_name" {}
+variable "location" {}
+
+
+---
+
+📁 modules/vm/main.tf
+
+resource "azurerm_windows_virtual_machine" "this" {
+  name                  = var.vm_name
+  resource_group_name   = var.rg_name
+  location              = var.location
+  size                  = "Standard_B1s"
+  admin_username        = var.admin_username
+  admin_password        = var.admin_password
+  network_interface_ids = [var.nic_id]
+}
+
+resource "azurerm_network_interface" "nic" {
+  name                = "${var.vm_name}-nic"
+  location            = var.location
+  resource_group_name = var.rg_name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = var.subnet_id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.this.id
+  }
+}
+
+resource "azurerm_public_ip" "this" {
+  name                = "${var.vm_name}-pip"
+  location            = var.location
+  resource_group_name = var.rg_name
+  allocation_method   = "Dynamic"
+}
+
+📁 modules/vm/variables.tf
+
+variable "vm_name" {}
+variable "rg_name" {}
+variable "location" {}
+variable "admin_username" {}
+variable "admin_password" {}
+variable "subnet_id" {}
+variable "nic_id" {}
+
+
+---
+
+📁 2. rg/ (Root Module for RG)
+
+rg/main.tf
+
+module "rg" {
+  source   = "../modules/rg"
+  rg_name  = var.rg_name
+  location = var.location
+}
+
+rg/variables.tf
+
+variable "rg_name" {}
+variable "location" {}
+
+rg/terraform.tfvars
+
+rg_name  = "prod-rg"
+location = "East US"
+
+
+---
+
+📁 3. storage/ (Root Module for Storage)
+
+storage/main.tf
+
+module "storage" {
+  source        = "../modules/storage"
+  storage_name  = var.storage_name
+  rg_name       = var.rg_name
+  location      = var.location
+}
+
+storage/variables.tf
+
+variable "storage_name" {}
+variable "rg_name" {}
+variable "location" {}
+
+storage/terraform.tfvars
+
+storage_name = "storagedev123"
+rg_name      = "prod-rg"
+location     = "East US"
+
+
+---
+
+📁 4. vm/ (Root Module for VM)
+
+vm/main.tf
+
+module "vm" {
+  source          = "../modules/vm"
+  vm_name         = var.vm_name
+  rg_name         = var.rg_name
+  location        = var.location
+  admin_username  = var.admin_username
+  admin_password  = var.admin_password
+  subnet_id       = var.subnet_id
+  nic_id          = var.nic_id
+}
+
+vm/variables.tf
+
+variable "vm_name" {}
+variable "rg_name" {}
+variable "location" {}
+variable "admin_username" {}
+variable "admin_password" {}
+variable "subnet_id" {}
+variable "nic_id" {}
+
+vm/terraform.tfvars
+
+vm_name         = "devvm01"
+rg_name         = "prod-rg"
+location        = "East US"
+admin_username  = "azureuser"
+admin_password  = "P@ssw0rd123!"
+subnet_id       = "<subnet-id>"       # Replace manually
+nic_id          = "<nic-resource-id>" # Replace manually
+
+> VM banane se pehle tu subnet aur VNet bana ke manually yeh values paste karega.
+
+
+
+
+---
+
+🤖 5. GitHub Workflows (One for Each)
+
+.github/workflows/rg.yml
+
+name: Create RG
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./rg
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan -var-file="terraform.tfvars" -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+
+> Baaki storage.yml and vm.yml same honge, sirf working-directory: change karo (./storage, ./vm)
+
+
+
+
+---
+
+🔐 GitHub Secrets (Add these in repo settings)
+
+Secret Name	Value
+
+ARM_CLIENT_ID	From Azure AD App
+ARM_CLIENT_SECRET	App password
+ARM_SUBSCRIPTION_ID	Azure subscription
+ARM_TENANT_ID	Tenant ID
+
+
+
+---
+
+✅ How it Works (Clear Logic)
+
+1. Har resource ka alag folder + alag YAML
+
+
+2. Jab tu rg.yml run karega → sirf rg/ folder ka code chalega → RG banega
+
+
+3. Jab tu storage.yml run karega → sirf storage/ folder ka code chalega → Storage banega
+
+
+4. Jab tu vm.yml run karega → sirf vm/ folder ka code chalega → VM banega
+
+
+
+➡ Ek resource banega dusra nahi — full control tere haath me.
+
+
+---
+
+🎁 Bonus:
+
+Tu bole:
+
+> "Bhai mujhe ye pura structure ZIP me chahiye as download"
+
+
+
+Main tujhe ye complete ready-to-run folder generate karke de dunga (jab internet access mile).
+
+
+---
+
+Bol bhai, ab clear hua? Ya tu chahe to pehle RG ka full example dekh ke samajhna chahe to wo bhi kar sakte hain.
