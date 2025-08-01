@@ -1,4 +1,4 @@
-name: Terraform Deploy All Resources
+name: Deploy All Resources
 
 on:
   workflow_dispatch:
@@ -6,60 +6,55 @@ on:
       rg_name:
         description: 'Resource Group Name'
         required: true
-        default: 'my-rg'
       location:
-        description: 'Azure Region'
+        description: 'Location (e.g., eastus)'
         required: true
-        default: 'eastus'
       dev_stg:
         description: 'Storage Account Name'
         required: true
-        default: 'mystorage12345'
       vm_name:
         description: 'Virtual Machine Name'
         required: true
-        default: 'myvm'
 
 jobs:
   deploy:
-    name: Deploy Complete Infra
     runs-on: ubuntu-latest
+    name: Terraform Deploy
 
     steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout Repo
+      uses: actions/checkout@v4
 
-      - name: 🛠️ Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.7.5
+    - name: Azure Login (OIDC)
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: 🔐 Azure Login via Service Principal
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.7.5
 
-      - name: 📦 Terraform Init
-        run: terraform init
+    - name: Terraform Init
+      run: terraform init
 
-      - name: ✅ Terraform Validate
-        run: terraform validate
+    - name: Terraform Validate
+      run: terraform validate
 
-      - name: 📊 Terraform Plan
-        run: |
-          terraform plan \
-            -var="rg_name=${{ github.event.inputs.rg_name }}" \
-            -var="location=${{ github.event.inputs.location }}" \
-            -var="dev_stg=${{ github.event.inputs.dev_stg }}" \
-            -var="vm_name=${{ github.event.inputs.vm_name }}"
+    - name: Terraform Plan
+      run: |
+        terraform plan \
+          -var="rg_name=${{ github.event.inputs.rg_name }}" \
+          -var="location=${{ github.event.inputs.location }}" \
+          -var="dev_stg=${{ github.event.inputs.dev_stg }}" \
+          -var="vm_name=${{ github.event.inputs.vm_name }}"
 
-      - name: 🚀 Terraform Apply
-        run: |
-          terraform apply -auto-approve \
-            -var="rg_name=${{ github.event.inputs.rg_name }}" \
-            -var="location=${{ github.event.inputs.location }}" \
-            -var="dev_stg=${{ github.event.inputs.dev_stg }}" \
-            -var="vm_name=${{ github.event.inputs.vm_name }}"
+    - name: Terraform Apply
+      run: |
+        terraform apply -auto-approve \
+          -var="rg_name=${{ github.event.inputs.rg_name }}" \
+          -var="location=${{ github.event.inputs.location }}" \
+          -var="dev_stg=${{ github.event.inputs.dev_stg }}" \
+          -var="vm_name=${{ github.event.inputs.vm_name }}"
