@@ -1,3 +1,11 @@
+# 
+
+
+
+
+
+
+
 name: Deploy All Resources
 
 on:
@@ -16,45 +24,55 @@ on:
         description: 'Virtual Machine Name'
         required: true
 
+permissions:
+  id-token: write         # 🟢 Required for OIDC
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Terraform Deploy
 
     steps:
-    - name: Checkout Repo
+    - name: 📦 Checkout Code
       uses: actions/checkout@v4
 
-    - name: Azure Login (OIDC)
+    - name: 🔐 Azure Login with OIDC
       uses: azure/login@v1
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-    - name: Setup Terraform
+    - name: ⚙️ Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: 1.7.5
 
-    - name: Terraform Init
+    - name: 📂 Terraform Init
       run: terraform init
 
-    - name: Terraform Validate
+    - name: ✅ Terraform Validate
       run: terraform validate
 
-    - name: Terraform Plan
+    - name: 📊 Terraform Plan
       run: |
         terraform plan \
           -var="rg_name=${{ github.event.inputs.rg_name }}" \
           -var="location=${{ github.event.inputs.location }}" \
           -var="dev_stg=${{ github.event.inputs.dev_stg }}" \
-          -var="vm_name=${{ github.event.inputs.vm_name }}"
+          -var="vm_name=${{ github.event.inputs.vm_name }}" \
+          -var="client_id=${{ secrets.AZURE_CLIENT_ID }}" \
+          -var="tenant_id=${{ secrets.AZURE_TENANT_ID }}" \
+          -var="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
-    - name: Terraform Apply
+    - name: 🚀 Terraform Apply
       run: |
         terraform apply -auto-approve \
           -var="rg_name=${{ github.event.inputs.rg_name }}" \
           -var="location=${{ github.event.inputs.location }}" \
           -var="dev_stg=${{ github.event.inputs.dev_stg }}" \
-          -var="vm_name=${{ github.event.inputs.vm_name }}"
+          -var="vm_name=${{ github.event.inputs.vm_name }}" \
+          -var="client_id=${{ secrets.AZURE_CLIENT_ID }}" \
+          -var="tenant_id=${{ secrets.AZURE_TENANT_ID }}" \
+          -var="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
