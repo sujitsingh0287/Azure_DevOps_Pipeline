@@ -18,5 +18,9 @@ terraform {
 
 provider "azurerm" {
   features {}
-  subscription_id = "c316f505-7597-4175-b5db-d2949009d506"
+
+  use_oidc = true
+  client_id       = var.client_id        # GitHub Action se milega
+  tenant_id       = var.tenant_id
+  subscription_id = var.subscription_id
 }
