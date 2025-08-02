@@ -8,6 +8,7 @@ variable "location" {
 
 variable "vnet_name" {
   type = string
+  default = "old-delhi-vnet"
 }
 
 variable "address_space" {
@@ -16,4 +17,5 @@ variable "address_space" {
 
 variable "subnet" {
   type = string
+  default = "old-delhi-subnet"
 }

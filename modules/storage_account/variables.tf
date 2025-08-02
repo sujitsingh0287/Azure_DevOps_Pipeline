@@ -1,5 +1,6 @@
 variable "dev_stg" {
   type = string
+  default = "hellostgtest"
 }
 
 variable "rg_name" {
