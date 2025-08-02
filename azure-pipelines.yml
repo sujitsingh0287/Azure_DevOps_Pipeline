@@ -25,6 +25,7 @@ steps:
     backendAzureRmContainerName: 'tfstate'
     backendAzureRmKey: 'terraform.tfstate'
     environmentAzureRmUseOidc: true
+    environmentServiceNameAzureRM: 'azuredevops-pileline'
 
 # ================================
 # Terraform VALIDATE
@@ -35,6 +36,7 @@ steps:
     provider: 'azurerm'
     command: 'validate'
     environmentAzureRmUseOidc: true
+    environmentServiceNameAzureRM: 'azuredevops-pileline'
 
 # ================================
 # Terraform PLAN
@@ -45,6 +47,7 @@ steps:
     provider: 'azurerm'
     command: 'plan'
     environmentAzureRmUseOidc: true
+    environmentServiceNameAzureRM: 'azuredevops-pileline'
     commandOptions: >
       -var "rg_name=$(rg_name)"
       -var "location=$(location)"
@@ -60,6 +63,7 @@ steps:
     provider: 'azurerm'
     command: 'apply'
     environmentAzureRmUseOidc: true
+    environmentServiceNameAzureRM: 'azuredevops-pileline'
     commandOptions: >
       -auto-approve
       -var "rg_name=$(rg_name)"
