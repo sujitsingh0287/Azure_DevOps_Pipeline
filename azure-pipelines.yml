@@ -1,20 +1,21 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+trigger: none  # manual run only
 
-trigger:
-- main
+pool: AUS-POOL  # your self-hosted agent pool
 
-pool: AUS-POOL
+variables:
+  terraformVersion: '1.7.5'
 
 steps:
 - task: TerraformInstaller@1
+  displayName: 'Install Terraform'
   inputs:
-    terraformVersion: 'latest'
+    terraformVersion: '$(terraformVersion)'
 
-step    
-- task: TerraformTask@5
+# ================================
+# Terraform INIT
+# ================================
+- task: TerraformTaskV4@4
+  displayName: 'Terraform Init'
   inputs:
     provider: 'azurerm'
     command: 'init'
@@ -23,21 +24,45 @@ step
     backendAzureRmStorageAccountName: 'devopstfstate123'
     backendAzureRmContainerName: 'tfstate'
     backendAzureRmKey: 'terraform.tfstate'
+    environmentAzureRmUseOidc: true
 
-- task: TerraformTask@5
+# ================================
+# Terraform VALIDATE
+# ================================
+- task: TerraformTaskV4@4
+  displayName: 'Terraform Validate'
   inputs:
     provider: 'azurerm'
     command: 'validate'
-    environmentAzureRmUseIdTokenGeneration: true
+    environmentAzureRmUseOidc: true
 
-- task: TerraformTask@5
+# ================================
+# Terraform PLAN
+# ================================
+- task: TerraformTaskV4@4
+  displayName: 'Terraform Plan'
   inputs:
     provider: 'azurerm'
     command: 'plan'
-    environmentServiceNameAzureRM: 'azuredevops-pileline'
+    environmentAzureRmUseOidc: true
+    commandOptions: >
+      -var "rg_name=$(rg_name)"
+      -var "location=$(location)"
+      -var "dev_stg=$(dev_stg)"
+      -var "vm_name=$(vm_name)"
 
-- task: TerraformTask@5
+# ================================
+# Terraform APPLY
+# ================================
+- task: TerraformTaskV4@4
+  displayName: 'Terraform Apply'
   inputs:
     provider: 'azurerm'
     command: 'apply'
-    environmentServiceNameAzureRM: 'azuredevops-pileline'
+    environmentAzureRmUseOidc: true
+    commandOptions: >
+      -auto-approve
+      -var "rg_name=$(rg_name)"
+      -var "location=$(location)"
+      -var "dev_stg=$(dev_stg)"
+      -var "vm_name=$(vm_name)"
