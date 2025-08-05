@@ -8,20 +8,29 @@ on:
         required: true
         default: 'my-rg'
       location:
-        description: 'Azure Location'
+        description: 'Azure Region'
         required: true
         default: 'East US'
       dev_stg:
         description: 'Storage Account Name'
         required: true
-        default: 'mystorageacct'
+        default: 'mystorageaccount'
       vm_name:
-        description: 'Virtual Machine Name'
+        description: 'VM Name'
         required: true
         default: 'my-vm'
+      vnet_name:
+        description: 'VNet Name'
+        required: true
+        default: 'my-vnet'
+      subnet:
+        description: 'Subnet Name'
+        required: true
+        default: 'my-subnet'
 
 jobs:
   terraform:
+    name: 'Terraform Apply'
     runs-on: ubuntu-latest
 
     env:
@@ -31,32 +40,36 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: 1.7.5
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
 
-    - name: Terraform Init
-      run: terraform init
+      - name: Terraform Init
+        run: terraform init
 
-    - name: Terraform Validate
-      run: terraform validate
+      - name: Terraform Validate
+        run: terraform validate
 
-    - name: Terraform Plan
-      run: |
-        terraform plan \
-          -var "rg_name=${{ github.event.inputs.rg_name }}" \
-          -var "location=${{ github.event.inputs.location }}" \
-          -var "dev_stg=${{ github.event.inputs.dev_stg }}" \
-          -var "vm_name=${{ github.event.inputs.vm_name }}"
+      - name: Terraform Plan
+        run: |
+          terraform plan \
+            -var "rg_name=${{ github.event.inputs.rg_name }}" \
+            -var "location=${{ github.event.inputs.location }}" \
+            -var "dev_stg=${{ github.event.inputs.dev_stg }}" \
+            -var "vm_name=${{ github.event.inputs.vm_name }}" \
+            -var "vnet_name=${{ github.event.inputs.vnet_name }}" \
+            -var "subnet=${{ github.event.inputs.subnet }}"
 
-    - name: Terraform Apply
-      run: |
-        terraform apply -auto-approve \
-          -var "rg_name=${{ github.event.inputs.rg_name }}" \
-          -var "location=${{ github.event.inputs.location }}" \
-          -var "dev_stg=${{ github.event.inputs.dev_stg }}" \
-          -var "vm_name=${{ github.event.inputs.vm_name }}"
+      - name: Terraform Apply
+        run: |
+          terraform apply -auto-approve \
+            -var "rg_name=${{ github.event.inputs.rg_name }}" \
+            -var "location=${{ github.event.inputs.location }}" \
+            -var "dev_stg=${{ github.event.inputs.dev_stg }}" \
+            -var "vm_name=${{ github.event.inputs.vm_name }}" \
+            -var "vnet_name=${{ github.event.inputs.vnet_name }}" \
+            -var "subnet=${{ github.event.inputs.subnet }}"

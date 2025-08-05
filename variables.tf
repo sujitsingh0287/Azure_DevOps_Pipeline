@@ -19,10 +19,7 @@ variable "vm_name" {
   type = string
 }
 
-# variable "subnet_id" {
-#   type = string
 
-# }
 
 variable "subnet" {
   type = string
@@ -30,19 +27,3 @@ variable "subnet" {
 }
 
 
-# variable "client_id" {
-#   type = string
-# }
-
-# variable "client_secret" {
-#   type = string
-#   sensitive = true
-# }
-
-# variable "tenant_id" {
-#   type = string
-# }
-
-# variable "subscription_id" {
-#   type = string
-# }
