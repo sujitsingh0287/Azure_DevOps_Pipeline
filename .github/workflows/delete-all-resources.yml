@@ -8,6 +8,10 @@ on:
         required: true
         default: 'my-rg'
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   delete-rg:
     runs-on: ubuntu-latest
@@ -23,8 +27,10 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          auth-type: service-principal
 
       - name: Delete Resource Group
         run: |
           echo "Deleting Resource Group: ${{ github.event.inputs.rg_name }}"
           az group delete --name "${{ github.event.inputs.rg_name }}" --yes --no-wait
+        
