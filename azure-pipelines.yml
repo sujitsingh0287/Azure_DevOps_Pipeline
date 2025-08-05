@@ -1,0 +1,72 @@
+trigger: none  # manual run only
+
+pool: AUS-POOL  # your self-hosted agent pool
+
+variables:
+  terraformVersion: '1.7.5'
+
+steps:
+- task: TerraformInstaller@1
+  displayName: 'Install Terraform'
+  inputs:
+    terraformVersion: '$(terraformVersion)'
+
+# ================================
+# Terraform INIT
+# ================================
+- task: TerraformTaskV4@4
+  displayName: 'Terraform Init'
+  inputs:
+    provider: 'azurerm'
+    command: 'init'
+    backendServiceArm: 'azuredevops-pileline'
+    backendAzureRmResourceGroupName: 'devops-tfstate-rg'
+    backendAzureRmStorageAccountName: 'devopstfstate123'
+    backendAzureRmContainerName: 'tfstate'
+    backendAzureRmKey: 'terraform.tfstate'
+    environmentAzureRmUseOidc: true
+    environmentServiceNameAzureRM: 'azuredevops-pileline'
+
+# ================================
+# Terraform VALIDATE
+# ================================
+- task: TerraformTaskV4@4
+  displayName: 'Terraform Validate'
+  inputs:
+    provider: 'azurerm'
+    command: 'validate'
+    environmentAzureRmUseOidc: true
+    environmentServiceNameAzureRM: 'azuredevops-pileline'
+
+# ================================
+# Terraform PLAN
+# ================================
+- task: TerraformTaskV4@4
+  displayName: 'Terraform Plan'
+  inputs:
+    provider: 'azurerm'
+    command: 'plan'
+    environmentAzureRmUseOidc: true
+    environmentServiceNameAzureRM: 'azuredevops-pileline'
+    commandOptions: >
+      -var "rg_name=$(rg_name)"
+      -var "location=$(location)"
+      -var "dev_stg=$(dev_stg)"
+      -var "vm_name=$(vm_name)"
+
+# ================================
+# Terraform APPLY
+# ================================
+- task: TerraformTaskV4@4
+  displayName: 'Terraform Apply'
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    environmentAzureRmUseOidc: true
+    environmentServiceNameAzureRM: 'azuredevops-pileline'
+    commandOptions: >
+      -auto-approve
+      -var "rg_name=$(rg_name)"
+      -var "location=$(location)"
+      -var "dev_stg=$(dev_stg)"
+      -var "vm_name=$(vm_name)"
