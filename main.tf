@@ -1,35 +1,37 @@
 module "new_rg" {
   source   = "./modules/resource_group"
-  rg_name  = var.rg_name
-  location = var.location
+  rg_name  = "KGF-rg"
+  location = "East US"
 }
 
 module "new_SA" {
   source     = "./modules/storage_account"
   depends_on = [module.new_rg]
-  dev_stg    = var.dev_stg
-  rg_name    = var.rg_name
-  location   = var.location
+  dev_stg    = "hanumansa1"
+  rg_name    = "KGF-rg"
+  location   = "East US"
 }
 
 
 module "vnet" {
   source        = "./modules/Virtual_Network"
   depends_on    = [module.new_rg]
-  rg_name       = var.rg_name
-  location      = var.location
-  vnet_name     = var.vnet_name
+  rg_name       = "KGF-rg"
+  location      = "East US"
+  vnet_name     = "hanuman_vnet"
   address_space = ["10.0.0.0/16"]
-  subnet        = var.subnet
+  subnet        = "hanuman_subnet"
 
 }
 
+
+
 module "myvm" {
   source     = "./modules/Virtual_Machine"
-  depends_on = [module.vnet]
-  rg_name    = var.rg_name
-  vm_name    = var.vm_name
-  location   = var.location
+  depends_on = [module.vnet, module.new_rg]
+  rg_name    = "KGF-rg"
+  vm_name    = "hanuman-vm"
+  location   = "East US"
   subnet_id  = module.vnet.subnet_id
 
 }

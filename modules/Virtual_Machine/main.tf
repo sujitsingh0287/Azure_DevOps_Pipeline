@@ -3,15 +3,31 @@ resource "azurerm_network_interface" "nic" {
   resource_group_name = var.rg_name
   location = var.location
 
-
-ip_configuration {
-    name = "Internal"
+  ip_configuration {
+    name = "Public"
     subnet_id = var.subnet_id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id = azurerm_public_ip.vm_public_ip.id
+    primary = "true"
+  }
+
+
+# ip_configuration {
+#     name = "Internal"
+#     subnet_id = var.subnet_id
+#     private_ip_address_allocation = "Dynamic"
     
   
- }
+#  }
   
+}
+
+resource "azurerm_public_ip" "vm_public_ip" {
+  name = "${var.vm_name}-public-ip"
+  resource_group_name = var.rg_name
+  location = var.location
+  allocation_method = "Static"
+  sku = "Standard"
 }
 
 resource "azurerm_windows_virtual_machine" "vm" {
