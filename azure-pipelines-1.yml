@@ -1,67 +1,81 @@
 trigger: none
 
-parameters:
-  - name: rg_name
-    displayName: 'Resource Group Name'
-    type: string
-    default: 'my-rg'
-
-  - name: location
-    displayName: 'Azure Region'
-    type: string
-    default: 'eastus'
-
-  - name: dev_stg
-    displayName: 'Storage Account Name'
-    type: string
-    default: 'mystorageacct'
-
-  - name: vnet_name
-    displayName: 'Virtual Network Name'
-    type: string
-    default: 'my-vnet'
-
-  - name: subnet
-    displayName: 'Subnet Name'
-    type: string
-    default: 'my-subnet'
-
-  - name: vm_name
-    displayName: 'VM Name'
-    type: string
-    default: 'myvm'
-
-# Use your custom self-hosted agent pool
 pool:
   name: AUS-POOL
 
-steps:
+parameters:
+  - name: rg_name
+    displayName: "Resource Group Name"
+    type: string
+  - name: location
+    displayName: "Location"
+    type: string
+  - name: dev_stg
+    displayName: "Storage Account Name"
+    type: string
+  - name: vnet_name
+    displayName: "Virtual Network Name"
+    type: string
+  - name: subnet
+    displayName: "Subnet Name"
+    type: string
+  - name: vm_name
+    displayName: "VM Name"
+    type: string
 
-  - checkout: self
+stages:
+  - stage: Terraform_Deploy
+    jobs:
+      - job: DeployInfra
+        steps:
 
-  # Terraform must already be installed on self-hosted runner
-  - script: terraform version
-    displayName: 'Check Terraform Version'
+        - checkout: self
 
-  - script: terraform init
-    displayName: 'Terraform Init'
+        - task: Bash@3
+          displayName: Install Terraform
+          inputs:
+            targetType: 'inline'
+            script: |
+              sudo apt-get update && sudo apt-get install -y gnupg software-properties-common curl unzip
+              curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+              echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+              sudo apt-get update && sudo apt-get install terraform -y
+              terraform -version
 
-  - script: |
-      terraform plan \
-        -var="rg_name=${{ parameters.rg_name }}" \
-        -var="location=${{ parameters.location }}" \
-        -var="dev_stg=${{ parameters.dev_stg }}" \
-        -var="vnet_name=${{ parameters.vnet_name }}" \
-        -var="subnet=${{ parameters.subnet }}" \
-        -var="vm_name=${{ parameters.vm_name }}"
-    displayName: 'Terraform Plan'
+        - task: Bash@3
+          displayName: Terraform Init
+          inputs:
+            targetType: 'inline'
+            script: terraform init
 
-  - script: |
-      terraform apply -auto-approve \
-        -var="rg_name=${{ parameters.rg_name }}" \
-        -var="location=${{ parameters.location }}" \
-        -var="dev_stg=${{ parameters.dev_stg }}" \
-        -var="vnet_name=${{ parameters.vnet_name }}" \
-        -var="subnet=${{ parameters.subnet }}" \
-        -var="vm_name=${{ parameters.vm_name }}"
-    displayName: 'Terraform Apply'
+        - task: Bash@3
+          displayName: Terraform Validate
+          inputs:
+            targetType: 'inline'
+            script: terraform validate
+
+        - task: Bash@3
+          displayName: Terraform Plan
+          inputs:
+            targetType: 'inline'
+            script: |
+              terraform plan \
+              -var="rg_name=${{ parameters.rg_name }}" \
+              -var="location=${{ parameters.location }}" \
+              -var="dev_stg=${{ parameters.dev_stg }}" \
+              -var="vnet_name=${{ parameters.vnet_name }}" \
+              -var="subnet=${{ parameters.subnet }}" \
+              -var="vm_name=${{ parameters.vm_name }}"
+
+        - task: Bash@3
+          displayName: Terraform Apply
+          inputs:
+            targetType: 'inline'
+            script: |
+              terraform apply -auto-approve \
+              -var="rg_name=${{ parameters.rg_name }}" \
+              -var="location=${{ parameters.location }}" \
+              -var="dev_stg=${{ parameters.dev_stg }}" \
+              -var="vnet_name=${{ parameters.vnet_name }}" \
+              -var="subnet=${{ parameters.subnet }}" \
+              -var="vm_name=${{ parameters.vm_name }}"
