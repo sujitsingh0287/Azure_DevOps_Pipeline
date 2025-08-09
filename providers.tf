@@ -8,9 +8,9 @@ terraform {
   }
 
   backend "azurerm" {
-    resource_group_name  = "devops-tfstate-rg"            # RG jisme storage account bana hai
-    storage_account_name = "devopstfstate123"         # Storage account name (lowercase only)
-    container_name       = "tfstate"                  # Blob container jisme state store hoga
+    resource_group_name  = "prod-tfstate-rg"            # RG jisme storage account bana hai
+    storage_account_name = "prodstg005"         # Storage account name (lowercase only)
+    container_name       = "tfstatefile"                  # Blob container jisme state store hoga
     key                  = "terraform.tfstate"        # State file ka naam
   }
 
