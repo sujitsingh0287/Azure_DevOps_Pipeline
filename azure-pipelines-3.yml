@@ -16,27 +16,31 @@ steps:
     terraformVersion: 'latest'
 
 - task: TerraformTask@5
+# displayName: init
   inputs:
     provider: 'azurerm'
     command: 'init'
     backendServiceArm: 'azuredevops-pileline'
-    backendAzureRmResourceGroupName: 'devops-tfstate-rg'
-    backendAzureRmStorageAccountName: 'devopstfstate123'
-    backendAzureRmContainerName: 'tfstate'
+    backendAzureRmResourceGroupName: 'prod-tfstate-rg'
+    backendAzureRmStorageAccountName: 'prodstg005'
+    backendAzureRmContainerName: 'tfstatefile'
     backendAzureRmKey: 'terraform.tfstate'
 
 - task: TerraformTask@5
+# displayName: validate
   inputs:
     provider: 'azurerm'
     command: 'validate'
 
 - task: TerraformTask@5
+# displayName: plan
   inputs:
     provider: 'azurerm'
     command: 'plan'
     environmentServiceNameAzureRM: 'azuredevops-pileline'
 
 - task: TerraformTask@5
+# displayName: apply
   inputs:
     provider: 'azurerm'
     command: 'apply'
