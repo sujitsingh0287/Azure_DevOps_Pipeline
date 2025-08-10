@@ -16,32 +16,40 @@ steps:
     terraformVersion: 'latest'
 
 - task: TerraformTask@5
-# displayName: init
+  displayName: init
   inputs:
     provider: 'azurerm'
     command: 'init'
     backendServiceArm: 'azuredevops-pileline'
+    backendAzureRmOverrideSubscriptionID: 'c316f505-7597-4175-b5db-d2949009d506'
     backendAzureRmResourceGroupName: 'prod-tfstate-rg'
     backendAzureRmStorageAccountName: 'prodstg005'
     backendAzureRmContainerName: 'tfstatefile'
     backendAzureRmKey: 'terraform.tfstate'
+    workingDirectory: $(System.DefaultWorkingDirectory)
+
 
 - task: TerraformTask@5
-# displayName: validate
+  displayName: validate
   inputs:
     provider: 'azurerm'
     command: 'validate'
 
 - task: TerraformTask@5
-# displayName: plan
+  displayName: plan
   inputs:
     provider: 'azurerm'
     command: 'plan'
     environmentServiceNameAzureRM: 'azuredevops-pileline'
+    environmentAzureRmOverrideSubscriptionID: 'c316f505-7597-4175-b5db-d2949009d506'
+    workingDirectory: $(System.DefaultWorkingDirectory)
 
 - task: TerraformTask@5
-# displayName: apply
+  displayName: apply
   inputs:
     provider: 'azurerm'
     command: 'apply'
     environmentServiceNameAzureRM: 'azuredevops-pileline'
+    workingDirectory: $(System.DefaultWorkingDirectory)
+
+    
