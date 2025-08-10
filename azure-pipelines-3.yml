@@ -16,7 +16,7 @@ steps:
     terraformVersion: 'latest'
 
 - task: TerraformTask@5
-  displayName: init
+  displayName: terraform init
   inputs:
     provider: 'azurerm'
     command: 'init'
@@ -26,17 +26,17 @@ steps:
     backendAzureRmStorageAccountName: 'prodstg005'
     backendAzureRmContainerName: 'tfstatefile'
     backendAzureRmKey: 'terraform.tfstate'
-    workingDirectory: $(System.DefaultWorkingDirectory)
+    workingDirectory: $(System.DefaultWorkingDirectory)/s
 
 
 - task: TerraformTask@5
-  displayName: validate
+  displayName: terraform validate
   inputs:
     provider: 'azurerm'
     command: 'validate'
 
 - task: TerraformTask@5
-  displayName: plan
+  displayName: terraform plan
   inputs:
     provider: 'azurerm'
     command: 'plan'
@@ -45,7 +45,7 @@ steps:
     workingDirectory: $(System.DefaultWorkingDirectory)
 
 - task: TerraformTask@5
-  displayName: apply
+  displayName: terraform apply
   inputs:
     provider: 'azurerm'
     command: 'apply'
