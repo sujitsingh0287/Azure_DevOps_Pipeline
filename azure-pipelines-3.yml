@@ -26,7 +26,7 @@ steps:
     backendAzureRmStorageAccountName: 'prodstg005'
     backendAzureRmContainerName: 'tfstatefile'
     backendAzureRmKey: 'terraform.tfstate'
-    workingDirectory: $(System.DefaultWorkingDirectory)/s
+    workingDirectory: $(System.DefaultWorkingDirectory)
 
 
 - task: TerraformTask@5
@@ -42,7 +42,7 @@ steps:
     command: 'plan'
     environmentServiceNameAzureRM: 'azuredevops-pileline'
     environmentAzureRmOverrideSubscriptionID: 'c316f505-7597-4175-b5db-d2949009d506'
-    workingDirectory: $(System.DefaultWorkingDirectory)/s
+    workingDirectory: $(System.DefaultWorkingDirectory)
 
 - task: TerraformTask@5
   displayName: terraform apply
@@ -50,6 +50,6 @@ steps:
     provider: 'azurerm'
     command: 'apply'
     environmentServiceNameAzureRM: 'azuredevops-pileline'
-    workingDirectory: $(System.DefaultWorkingDirectory)/s
+    workingDirectory: $(System.DefaultWorkingDirectory)
 
     
