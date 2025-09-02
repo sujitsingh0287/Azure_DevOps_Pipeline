@@ -1,4 +1,4 @@
-name: Terraform Deploy All Resources New
+name: Terraform Deploy All resources in one click
 
 on:
   workflow_dispatch:
