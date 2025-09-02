@@ -32,7 +32,7 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
 
-    permissions:        # 🔑 OIDC ke liye zaroori
+    permissions:
       id-token: write
       contents: read
 
@@ -66,7 +66,10 @@ jobs:
             -var "dev_stg=${{ github.event.inputs.dev_stg }}" \
             -var "vm_name=${{ github.event.inputs.vm_name }}" \
             -var "vnet_name=${{ github.event.inputs.vnet_name }}" \
-            -var "subnet=${{ github.event.inputs.subnet }}"
+            -var "subnet=${{ github.event.inputs.subnet }}" \
+            -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+            -var "tenant_id=${{ secrets.AZURE_TENANT_ID }}" \
+            -var "client_id=${{ secrets.AZURE_CLIENT_ID }}"
 
       - name: Terraform Apply
         run: |
@@ -76,4 +79,7 @@ jobs:
             -var "dev_stg=${{ github.event.inputs.dev_stg }}" \
             -var "vm_name=${{ github.event.inputs.vm_name }}" \
             -var "vnet_name=${{ github.event.inputs.vnet_name }}" \
-            -var "subnet=${{ github.event.inputs.subnet }}"
+            -var "subnet=${{ github.event.inputs.subnet }}" \
+            -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+            -var "tenant_id=${{ secrets.AZURE_TENANT_ID }}" \
+            -var "client_id=${{ secrets.AZURE_CLIENT_ID }}"
