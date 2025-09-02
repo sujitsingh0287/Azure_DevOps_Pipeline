@@ -8,18 +8,16 @@ terraform {
   }
 
   backend "azurerm" {
-    resource_group_name  = "prod-tfstate-rg"            # RG jisme storage account bana hai
-    storage_account_name = "prodstg006"         # Storage account name (lowercase only)
-    container_name       = "tfstatefile"                  # Blob container jisme state store hoga
-    key                  = "terraform.tfstate"        # State file ka naam
+    resource_group_name  = "prod-tfstate-rg"
+    storage_account_name = "prodstg006"
+    container_name       = "tfstatefile"
+    key                  = "terraform.tfstate"
+    # subscription_id, tenant_id, client_id yahan mat daalo
   }
-
 }
 
 provider "azurerm" {
   features {}
-  
-  # Yeh lines add karo OIDC ke liye
   use_oidc = true
   subscription_id = var.subscription_id
   tenant_id       = var.tenant_id
