@@ -53,33 +53,53 @@ jobs:
           terraform_version: 1.7.5
 
       - name: Terraform Init
+        env:
+          ARM_USE_OIDC: true
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         run: terraform init
 
       - name: Terraform Validate
+        env:
+          ARM_USE_OIDC: true
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         run: terraform validate
 
       - name: Terraform Plan
+        env:
+          ARM_USE_OIDC: true
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         run: |
           terraform plan \
+            -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+            -var "tenant_id=${{ secrets.AZURE_TENANT_ID }}" \
+            -var "client_id=${{ secrets.AZURE_CLIENT_ID }}" \
             -var "rg_name=${{ github.event.inputs.rg_name }}" \
             -var "location=${{ github.event.inputs.location }}" \
             -var "dev_stg=${{ github.event.inputs.dev_stg }}" \
             -var "vm_name=${{ github.event.inputs.vm_name }}" \
             -var "vnet_name=${{ github.event.inputs.vnet_name }}" \
-            -var "subnet=${{ github.event.inputs.subnet }}" \
-            -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
-            -var "tenant_id=${{ secrets.AZURE_TENANT_ID }}" \
-            -var "client_id=${{ secrets.AZURE_CLIENT_ID }}"
+            -var "subnet=${{ github.event.inputs.subnet }}"
 
       - name: Terraform Apply
+        env:
+          ARM_USE_OIDC: true
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         run: |
           terraform apply -auto-approve \
+            -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+            -var "tenant_id=${{ secrets.AZURE_TENANT_ID }}" \
+            -var "client_id=${{ secrets.AZURE_CLIENT_ID }}" \
             -var "rg_name=${{ github.event.inputs.rg_name }}" \
             -var "location=${{ github.event.inputs.location }}" \
             -var "dev_stg=${{ github.event.inputs.dev_stg }}" \
             -var "vm_name=${{ github.event.inputs.vm_name }}" \
             -var "vnet_name=${{ github.event.inputs.vnet_name }}" \
-            -var "subnet=${{ github.event.inputs.subnet }}" \
-            -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
-            -var "tenant_id=${{ secrets.AZURE_TENANT_ID }}" \
-            -var "client_id=${{ secrets.AZURE_CLIENT_ID }}"
+            -var "subnet=${{ github.event.inputs.subnet }}"
