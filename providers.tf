@@ -9,7 +9,7 @@ terraform {
 
   backend "azurerm" {
     resource_group_name  = "prod-tfstate-rg"            # RG jisme storage account bana hai
-    storage_account_name = "prodstg005"         # Storage account name (lowercase only)
+    storage_account_name = "prodstg006"         # Storage account name (lowercase only)
     container_name       = "tfstatefile"                  # Blob container jisme state store hoga
     key                  = "terraform.tfstate"        # State file ka naam
   }
@@ -18,7 +18,7 @@ terraform {
 
 provider "azurerm" {
   features {}
-  subscription_id = "c316f505-7597-4175-b5db-d2949009d506"
+  subscription_id = "ff9732b6-644f-42fb-aad3-79fa3d280afd"
 
 #   # use_oidc = true
 #   client_id       = var.client_id        # GitHub Action se milega
