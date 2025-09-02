@@ -18,11 +18,10 @@ terraform {
 
 provider "azurerm" {
   features {}
-  subscription_id = "ff9732b6-644f-42fb-aad3-79fa3d280afd"
-
-#   # use_oidc = true
-#   client_id       = var.client_id        # GitHub Action se milega
-#   client_secret   = var.client_secret
-#   tenant_id       = var.tenant_id
-#   subscription_id = var.subscription_id
+  
+  # Yeh lines add karo OIDC ke liye
+  use_oidc = true
+  subscription_id = var.subscription_id
+  tenant_id       = var.tenant_id
+  client_id       = var.client_id
 }
