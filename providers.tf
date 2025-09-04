@@ -9,8 +9,8 @@ terraform {
   }
 
   backend "azurerm" {
-    resource_group_name  = "prod-tfstate-rg"
-    storage_account_name = "prodstg006"
+    resource_group_name  = "RG-TFSTATEFILE-DONNOT-DELETE"
+    storage_account_name = "securetfstatefile"
     container_name       = "tfstatefile"
     key                  = "terraform.tfstate"
   }
