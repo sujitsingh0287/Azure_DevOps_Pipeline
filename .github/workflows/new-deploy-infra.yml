@@ -59,9 +59,19 @@ jobs:
         run: terraform init -upgrade
 
       - name: Terraform Validate
+        env:
+          ARM_USE_OIDC: true
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         run: terraform validate
 
       - name: Terraform Plan
+        env:
+          ARM_USE_OIDC: true
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         run: |
           terraform plan \
             -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
@@ -120,6 +130,11 @@ jobs:
           terraform_version: 1.7.5
 
       - name: Terraform Apply
+        env:
+          ARM_USE_OIDC: true
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         run: |
           terraform apply -auto-approve \
             -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
