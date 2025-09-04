@@ -5,7 +5,7 @@ terraform {
       version = "4.42.0"
     }
   }
-}
+
 
   backend "azurerm" {
     resource_group_name  = "RG-TFSTATEFILE-DONNOT-DELETE"
@@ -13,7 +13,7 @@ terraform {
     container_name       = "tfstatefile"
     key                  = "terraform.tfstate"
   }
-
+}
 
 provider "azurerm" {
   features {}
