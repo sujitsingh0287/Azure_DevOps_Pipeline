@@ -1,25 +1,24 @@
 terraform {
-  required_version = ">= 1.3.0"
-
   required_providers {
     azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 4.67.0" # latest stable version use kar
+      source = "hashicorp/azurerm"
+      version = "4.42.0"
     }
-  }
-
-  backend "azurerm" {
-    resource_group_name  = "RG-TFSTATEFILE-DONNOT-DELETE"
-    storage_account_name = "securetfstatefile"
-    container_name       = "tfstatefile"
-    key                  = "terraform.tfstate"
   }
 }
 
+#   backend "azurerm" {
+#     resource_group_name  = "RG-TFSTATEFILE-DONNOT-DELETE"
+#     storage_account_name = "securetfstatefile"
+#     container_name       = "tfstatefile"
+#     key                  = "terraform.tfstate"
+#   }
+# }
+
 provider "azurerm" {
   features {}
-  use_oidc = true
-  subscription_id = var.subscription_id
-  tenant_id       = var.tenant_id
-  client_id       = var.client_id
+#   use_oidc = true
+#   subscription_id = var.subscription_id
+#   tenant_id       = var.tenant_id
+#   client_id       = var.client_id
 }
