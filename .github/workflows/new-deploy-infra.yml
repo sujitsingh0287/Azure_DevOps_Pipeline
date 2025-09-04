@@ -56,14 +56,9 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        run: terraform init -upgrade
+        run: terraform init -upgrade -reconfigure
 
       - name: Terraform Validate
-        env:
-          ARM_USE_OIDC: true
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         run: terraform validate
 
       - name: Terraform Plan
@@ -95,16 +90,19 @@ jobs:
         run: |
           curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
           tflint --init
+          # Run TFLint but don't fail pipeline
           tflint || true
 
       - name: Setup tfsec
         run: |
           curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+          # Run tfsec but don't fail pipeline
           tfsec . || true
 
       - name: Setup Checkov
         run: |
           pip install checkov
+          # Run checkov but don't fail pipeline
           checkov -d . || true
 
   terraform-apply:
@@ -128,6 +126,14 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.7.5
+
+      - name: Terraform Init
+        env:
+          ARM_USE_OIDC: true
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        run: terraform init -upgrade -reconfigure
 
       - name: Terraform Apply
         env:
