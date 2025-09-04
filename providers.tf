@@ -1,9 +1,10 @@
 terraform {
   required_version = ">= 1.3.0"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "4.35.0"
+      version = "~> 4.67.0" # latest stable version use kar
     }
   }
 
@@ -12,7 +13,6 @@ terraform {
     storage_account_name = "prodstg006"
     container_name       = "tfstatefile"
     key                  = "terraform.tfstate"
-    # subscription_id, tenant_id, client_id yahan mat daalo
   }
 }
 
